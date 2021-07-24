@@ -1,5 +1,11 @@
 # pylisp(Python LISP)
 
+## History
+
+### 2021.7.24
+
+ - Parse of Symbol, Bool, Number, List
+
 ## What is setupped?
 
  - Poetry
@@ -15,7 +21,7 @@
 
 ## Requirements
 
- - Python 3.8
+ - Python 3.9
  - poetry
 
 ## Installation
