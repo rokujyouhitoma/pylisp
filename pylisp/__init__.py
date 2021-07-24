@@ -92,6 +92,18 @@ def read_seq(tokens: typing.Sequence[str]) -> Result:
         xs = new_xs
 
 
+def env_get(k: str, env: Env):
+    exp = env.data.get(k.value)
+    if exp:
+        return exp
+    else:
+        outer_env = env.outer
+        if outer_env:
+            return env_get(k, outer_env)
+        else:
+            return None
+
+
 def parse_atom(token: str):
     if token == "true":
         return Bool(True)
@@ -121,7 +133,6 @@ def eval_if_args(arg_forms: typing.Sequence[Expression], env: Env):
 
 
 def eval_def_args(arg_forms: typing.Sequence[Expression], env: Env):
-    print(arg_forms)
     if len(arg_forms) == 0:
         return Result(None, Err("expected first form"))
     first_form = arg_forms[0]
@@ -160,7 +171,7 @@ def eval_built_in_form(exp: Expression, arg_forms: typing.Sequence[Expression], 
 
 def eval(exp: Expression, env: Env) -> Result:
     if isinstance(exp, Symbol):
-        return exp
+        return env_get(exp, env)
     elif isinstance(exp, Bool):
         return exp
     elif isinstance(exp, Number):
@@ -175,11 +186,12 @@ def eval(exp: Expression, env: Env) -> Result:
             return res
         else:
             first_eval = eval(first_form, env)
-            print(first_eval)
             if isinstance(first_eval, Func):
                 def f(v):
                     return v
                 return f(eval_forms(arg_forms, env))
+            else:
+                return Err("first form must be a function")
 
 
 def parse_eval(expr: str, env: Env) -> Result:
@@ -200,8 +212,10 @@ def main():
     #     result = parse_eval(expr, env).value
     #     print(result)
     #result = parse_eval("(1 2)", env).value
-    result = parse_eval("(def f (x))", env).value
+    result = parse_eval("(def f 1)", env).value
+    result = parse_eval("f", env).value
     print(result)
+    print(env)
 
 
 if __name__ == "__main__":
