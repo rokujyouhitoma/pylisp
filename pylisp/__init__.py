@@ -67,7 +67,7 @@ class Env:
 
 
 def default_env():
-    pass
+    return Env({}, None)
 
 
 def Ok(value):
@@ -116,7 +116,49 @@ def parse(tokens: typing.Sequence[str]) -> Result:
         return Result((parse_atom(token), rest), None)
 
 
-def eval(exp: Exp, env: Env) -> Result:
+def eval_if_args(arg_forms: typing.Sequence[Expression], env: Env):
+    pass
+
+
+def eval_def_args(arg_forms: typing.Sequence[Expression], env: Env):
+    print(arg_forms)
+    if len(arg_forms) == 0:
+        return Result(None, Err("expected first form"))
+    first_form = arg_forms[0]
+    if isinstance(first_form, Symbol):
+        first_str = Ok(first_form)
+    else:
+        return Err("expected first form to be a symbol")
+    if len(arg_forms) > 1:
+        second_form = arg_forms[1]
+    else:
+        return Err("expected second form")
+    if len(arg_forms) > 3:
+        return Err("def can only have two forms")
+    second_eval = eval(second_form, env)
+    env.data[first_str.value.value] = second_eval;
+    return Ok(first_form)
+
+
+def eval_lamba_args(arg_forms: typing.Sequence[Expression], env: Env):
+    pass
+
+
+def eval_built_in_form(exp: Expression, arg_forms: typing.Sequence[Expression], env: Env) -> typing.Optional[Result]:
+    if isinstance(exp, Symbol):
+        if exp.value == "if":
+            return eval_if_args(arg_forms, env)
+        elif exp.value == "def":
+            return eval_def_args(arg_forms, env)
+        elif exp.value == "fn":
+            return eval_lambda_args(arg_forms, env)
+        else:
+            return None
+    else:
+        return None
+
+
+def eval(exp: Expression, env: Env) -> Result:
     if isinstance(exp, Symbol):
         return exp
     elif isinstance(exp, Bool):
@@ -124,7 +166,20 @@ def eval(exp: Exp, env: Env) -> Result:
     elif isinstance(exp, Number):
         return exp
     elif isinstance(exp, List):
-        return exp
+        if len(exp.value) == 0:
+            return Result(None, Err("expected a non-empty list"))
+        first_form = exp.value[0]
+        arg_forms = exp.value[1:]
+        res = eval_built_in_form(first_form, arg_forms, env)
+        if res:
+            return res
+        else:
+            first_eval = eval(first_form, env)
+            print(first_eval)
+            if isinstance(first_eval, Func):
+                def f(v):
+                    return v
+                return f(eval_forms(arg_forms, env))
 
 
 def parse_eval(expr: str, env: Env) -> Result:
@@ -144,7 +199,8 @@ def main():
     #     expr = read_expr()
     #     result = parse_eval(expr, env).value
     #     print(result)
-    result = parse_eval("(1 2)", env).value
+    #result = parse_eval("(1 2)", env).value
+    result = parse_eval("(def f (x))", env).value
     print(result)
 
 
