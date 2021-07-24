@@ -1,4 +1,4 @@
-from sample import sample1
+from pylisp import sample1
 
 
 def test_sample():

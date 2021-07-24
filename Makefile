@@ -1,8 +1,8 @@
-PACKAGE=sample
+PACKAGE=pylisp
 PYTHON=python3.9
 POETRY=poetry
 RUN_PYTHON=${POETRY} run ${PYTHON}
-SRC=sample
+SRC=pylisp
 TESTS=tests
 
 all: clean format static_analysis test build run

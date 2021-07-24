@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "sample"
+name = "pylisp"
 version = "0.0.1"
-description = "python project template"
+description = "pylisp(Python LISP)"
 authors = ["Ike Tohru <ike.tohru@gmail.com>"]
 license = "MIT"
 
@@ -35,5 +35,5 @@ line_length = 88
 
 [tool.taskipy.tasks]
 format = { cmd = "task flake8", help = "format code" }
-flake8 = "flake8 --max-line-length=120 sample"
-mypy = "mypy --strict sample"
+flake8 = "flake8 --max-line-length=120 pylisp"
+mypy = "mypy --strict pylisp"

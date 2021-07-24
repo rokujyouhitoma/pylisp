@@ -1,7 +1,7 @@
 import pytest
 from sly.lex import Token as Token_
 
-from sample.parser import SampleLexer, SampleParser, Node
+from pylisp.parser import SampleLexer, SampleParser, Node
 
 
 def Token(type, value, lineno, index):
