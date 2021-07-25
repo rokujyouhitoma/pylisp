@@ -41,14 +41,14 @@ class List(Expression):
 
 @dataclass
 class Func(Expression):
-    params: typing.List[Expression]
-    body: Expression
+    params_exp: Expression
+    body_exp: Expression
 
 
 @dataclass
 class Lambda(Expression):
-    params: Expression
-    body: Expression
+    params_exp: Expression
+    body_exp: Expression
 
 
 class Exp(Enum):
@@ -129,6 +129,25 @@ def parse(tokens: typing.Sequence[str]) -> Result:
         return Result((parse_atom(token), rest), None)
 
 
+def eval_forms(arg_forms: Expression, env: Env):
+    return Ok([eval(x, env) for x in arg_forms])
+
+
+def parse_list_of_symbol_strings(form: Expression):
+    return form
+
+
+def env_for_lambda(params: Expression, arg_forms: Expression, outer_env: Env):
+    ks = parse_list_of_symbol_strings(params)
+    if len(ks.value) != len(arg_forms):
+        return Err("expected {} arguments, got {}".format(len(ks.value), len(arg_forms)))
+    vs = eval_forms(arg_forms, outer_env)
+    data = {}
+    for k, v in zip(ks, vs):
+        data[k] = v
+    return Ok(Env(data, outer_env))
+
+
 def eval_if_args(arg_forms: typing.Sequence[Expression], env: Env):
     pass
 
@@ -195,11 +214,14 @@ def eval(exp: Expression, env: Env) -> Result:
         if res:
             return res
         else:
-            first_eval = eval(first_form, env)
+            first_eval = eval(first_form, env).value
             if isinstance(first_eval, Func):
                 def f(v):
                     return v
                 return f(eval_forms(arg_forms, env))
+            elif isinstance(first_eval, Lambda):
+                new_env = env_for_lambda(first_eval.params_exp, arg_forms, env)
+                return eval(first_eval.body_exp, new_env)
             else:
                 return Err("first form must be a function")
 
@@ -222,8 +244,11 @@ def main():
     #     result = parse_eval(expr, env).value
     #     print(result)
     #result = parse_eval("(1 2)", env).value
-    result = parse_eval("(def f 1)", env).value
-    result = parse_eval("f", env).value
+    #result = parse_eval("(def f 1)", env).value
+    #result = parse_eval("f", env).value
+    q = "(def add-one (fn (a) (+ 1 a)))"
+    result = parse_eval(q, env).value
+    result = parse_eval("(add-one 1)", env).value
     print(result)
     print(env)
 
