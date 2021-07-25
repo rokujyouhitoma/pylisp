@@ -47,7 +47,7 @@ class Func(Expression):
 
 @dataclass
 class Lambda(Expression):
-    params: typing.List[Expression]
+    params: Expression
     body: Expression
 
 
@@ -67,7 +67,8 @@ class Env:
 
 
 def default_env():
-    return Env({}, None)
+    data = {}
+    return Env(data, None)
 
 
 def Ok(value):
@@ -144,15 +145,24 @@ def eval_def_args(arg_forms: typing.Sequence[Expression], env: Env):
         second_form = arg_forms[1]
     else:
         return Err("expected second form")
-    if len(arg_forms) > 3:
+    if len(arg_forms) > 2:
         return Err("def can only have two forms")
     second_eval = eval(second_form, env)
     env.data[first_str.value.value] = second_eval;
     return Ok(first_form)
 
 
-def eval_lamba_args(arg_forms: typing.Sequence[Expression], env: Env):
-    pass
+def eval_lambda_args(arg_forms: typing.Sequence[Expression], env: Env) -> Result:
+    if len(arg_forms) == 0:
+        return Result(None, Err("expected args form"))
+    params_exp = arg_forms[0]
+    if len(arg_forms) > 1:
+        body_exp = arg_forms[1]
+    else:
+        return Err("expected second form")
+    if len(arg_forms) > 2:
+        return Err("fn definition can only have two forms")
+    return Ok(Lambda(body_exp, params_exp))
 
 
 def eval_built_in_form(exp: Expression, arg_forms: typing.Sequence[Expression], env: Env) -> typing.Optional[Result]:

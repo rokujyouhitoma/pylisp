@@ -2,9 +2,14 @@
 
 ## History
 
+### 2021.7.25
+
+ - eval_lambda_args
+
 ### 2021.7.24
 
  - Parse of Symbol, Bool, Number, List
+ - eval_def_args
 
 ## What is setupped?
 
